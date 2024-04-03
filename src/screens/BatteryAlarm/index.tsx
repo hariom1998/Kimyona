@@ -17,14 +17,14 @@ export default function BatteryAlarmScreen({ route }: BatteryAlarmScreenProps) {
 
   const playSound = useCallback(async () => {
     console.log('Loading Sound')
-    const { sound } = await Audio.Sound.createAsync(
+    const { sound: audioTrack } = await Audio.Sound.createAsync(
       require('../../../assets/sounds/adiojori.mp3'),
       {
         shouldPlay: route?.params?.autoPlaySound,
       },
       onPlaybackStatusUpdate
     )
-    setSound(sound)
+    setSound(audioTrack)
 
     console.log('Playing Sound')
   }, [onPlaybackStatusUpdate, route?.params?.autoPlaySound])
