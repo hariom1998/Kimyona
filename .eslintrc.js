@@ -1,0 +1,62 @@
+module.exports = {
+  env: {
+    browser: true,
+    es6: true,
+  },
+  extends: ['plugin:react-hooks/recommended', 'eslint-config-prettier'],
+  ignorePatterns: [],
+  parser: '@typescript-eslint/parser',
+  parserOptions: {
+    sourceType: 'module',
+    project: './tsconfig.json',
+  },
+  plugins: ['@typescript-eslint', 'import', 'eslint-plugin-import'],
+  rules: {
+    '@typescript-eslint/adjacent-overload-signatures': 'error',
+    '@typescript-eslint/no-empty-function': 'error',
+    '@typescript-eslint/no-floating-promises': 'error',
+    '@typescript-eslint/no-unnecessary-type-assertion': 'error',
+    '@typescript-eslint/prefer-for-of': 'warn',
+    '@typescript-eslint/triple-slash-reference': 'error',
+    '@typescript-eslint/unified-signatures': 'warn',
+    '@typescript-eslint/no-shadow': ['error'],
+    'no-param-reassign': 'error',
+    'constructor-super': 'error',
+    eqeqeq: ['warn', 'always'],
+    'import/no-deprecated': 'warn',
+    'import/no-extraneous-dependencies': [
+      'error',
+      {
+        devDependencies: ['test/**'],
+        optionalDependencies: false,
+        peerDependencies: false,
+      },
+    ],
+    'no-cond-assign': 'error',
+    'no-duplicate-case': 'error',
+    'no-duplicate-imports': 'error',
+    'no-empty': [
+      'error',
+      {
+        allowEmptyCatch: true,
+      },
+    ],
+    'no-invalid-this': 'error',
+    'no-new-wrappers': 'error',
+    'no-redeclare': 'error',
+    'no-sequences': 'error',
+    'no-shadow': 'off',
+    'no-throw-literal': 'error',
+    'no-unsafe-finally': 'error',
+    'no-unused-labels': 'error',
+    'no-var': 'warn',
+    'no-void': 'error',
+    'prefer-const': 'warn',
+    'no-fallthrough': 'error',
+  },
+  settings: {
+    'import/resolver': {
+      typescript: {},
+    },
+  },
+}
