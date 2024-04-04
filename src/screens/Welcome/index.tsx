@@ -1,64 +1,74 @@
-import notifee, { EventType } from '@notifee/react-native'
 import { useNavigation } from '@react-navigation/native'
-import { LinearGradient } from 'expo-linear-gradient'
+import { Canvas, LinearGradient, Rect, vec } from '@shopify/react-native-skia'
 import React, { useEffect } from 'react'
-import { Button, Text, View } from 'react-native'
+import { Button, Dimensions, StyleSheet, Text, View } from 'react-native'
+import { TouchableWithoutFeedback } from 'react-native-gesture-handler'
+import {
+  useDerivedValue,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated'
+import { getRandomColor } from '../../utils/themeUtils'
 
 export default function WelcomeScreen() {
   const navigation = useNavigation()
+  const { height, width } = Dimensions.get('screen')
 
-  notifee.onBackgroundEvent(async ({ type, detail }) => {
-    console.log(type, detail.pressAction)
-    if (type === EventType.PRESS) {
-      console.log('User pressed notification with id: ', detail.pressAction?.id)
-      if (detail.pressAction?.id === 'openBatteryAlarm') {
-        navigation.navigate('batteryAlarm', { autoPlaySound: false })
-      }
-    }
-    if (type === EventType.ACTION_PRESS) {
-      const pressActionId = detail.pressAction?.id
-      if (pressActionId === 'stopAlarm') {
-        notifee.cancelAllNotifications().catch(e => console.log(e))
-      }
-    }
+  const leftColor = useSharedValue('red')
+  const rightColor = useSharedValue('blue')
+
+  const colors = useDerivedValue(() => {
+    return [leftColor.value, rightColor.value]
   })
 
-  notifee.onForegroundEvent(({ type, detail }) => {
-    console.log(type, detail.pressAction)
-    if (type === EventType.PRESS) {
-      console.log('User pressed notification with id: ', detail.pressAction?.id)
-      if (detail.pressAction?.id === 'openBatteryAlarm') {
-        navigation.navigate('batteryAlarm')
-      }
-    }
-    if (type === EventType.ACTION_PRESS) {
-      const pressActionId = detail.pressAction?.id
-      if (pressActionId === 'stopAlarm') {
-        notifee.cancelAllNotifications().catch(e => console.log(e))
-      }
-    }
-  })
-
+  // Navigate to 'home' after 5 seconds
   useEffect(() => {
     setTimeout(() => {
-      navigation.navigate('home')
+      //  navigation.navigate('home')
     }, 5000)
   }, [navigation])
 
   return (
-    <View className="flex-1 justify-center items-stretch ">
-      <LinearGradient
-        colors={['#F9F5F6', '#F8E8EE', '#F2BED1']}
-        className="flex-1 justify-center items-center"
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
+    <View style={styles.container}>
+      <Canvas style={styles.gradient}>
+        <Rect x={0} y={0} width={width} height={height}>
+          <LinearGradient
+            start={vec(0, 0)}
+            end={vec(width, height)}
+            colors={colors}
+          />
+        </Rect>
+      </Canvas>
+      <TouchableWithoutFeedback
+        style={{
+          width: width,
+          height: height,
+
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+        onPress={() => {
+          leftColor.value = withTiming(getRandomColor())
+          rightColor.value = withTiming(getRandomColor())
+        }}
       >
-        <Text className="text-3xl">WelcomeScreen</Text>
+        <Text style={{ fontSize: 24 }}>WelcomeScreen</Text>
         <Button
           title="Go to Home"
           onPress={() => navigation.navigate('home')}
-        ></Button>
-      </LinearGradient>
+        />
+      </TouchableWithoutFeedback>
     </View>
   )
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  gradient: {
+    ...StyleSheet.absoluteFillObject,
+  },
+})

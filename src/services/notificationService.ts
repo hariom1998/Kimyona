@@ -1,12 +1,14 @@
 import notifee, {
-    AndroidCategory,
-    AndroidImportance,
-    AndroidVisibility,
+  AndroidCategory,
+  AndroidImportance,
+  AndroidVisibility,
+  EventType,
 } from '@notifee/react-native'
 import * as BackgroundFetch from 'expo-background-fetch'
 import { BackgroundFetchResult } from 'expo-background-fetch'
 import { BatteryState, getBatteryLevelAsync, getBatteryStateAsync } from 'expo-battery'
 import * as TaskManager from 'expo-task-manager'
+import { navigationRef } from '../navigation/rootNavigation'
 
 export const sendBatteryNotification = async ({
     title,
@@ -112,4 +114,39 @@ export const checkStatusAsync = async (): Promise<[BackgroundFetch.BackgroundFet
     } else {
       await registerBackgroundTaskAsync()
     }
+  }
+
+  export const startNotificationHandlers = () => {
+    const navigation=navigationRef.current
+    notifee.onBackgroundEvent(async ({ type, detail }) => {
+      console.log(type, detail.pressAction)
+      if (type === EventType.PRESS) {
+        console.log('User pressed notification with id: ', detail.pressAction?.id)
+        if (detail.pressAction?.id === 'openBatteryAlarm') {
+          navigation?.navigate('batteryAlarm', { autoPlaySound: false })
+        }
+      }
+      if (type === EventType.ACTION_PRESS) {
+        const pressActionId = detail.pressAction?.id
+        if (pressActionId === 'stopAlarm') {
+          notifee.cancelAllNotifications().catch(e => console.log(e))
+        }
+      }
+    })
+  
+    notifee.onForegroundEvent(({ type, detail }) => {
+      console.log(type, detail.pressAction)
+      if (type === EventType.PRESS) {
+        console.log('User pressed notification with id: ', detail.pressAction?.id)
+        if (detail.pressAction?.id === 'openBatteryAlarm') {
+          navigation?.navigate('batteryAlarm')
+        }
+      }
+      if (type === EventType.ACTION_PRESS) {
+        const pressActionId = detail.pressAction?.id
+        if (pressActionId === 'stopAlarm') {
+          notifee.cancelAllNotifications().catch(e => console.log(e))
+        }
+      }
+    })
   }

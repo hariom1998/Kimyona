@@ -1,23 +1,64 @@
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { NavigationContainer } from '@react-navigation/native'
-import { createNativeStackNavigator } from '@react-navigation/native-stack'
-import BatteryAlarmScreen from '../screens/BatteryAlarm'
-import HomeScreen from '../screens/Home'
-import WelcomeScreen from '../screens/Welcome'
-import { RootStackParamList } from './types'
+import { useEffect, useState } from 'react'
+import { Linking, Platform, View } from 'react-native'
+import {
+  defaultDarkTheme,
+  defaultLightTheme,
+  useThemeContext,
+} from '../contexts/themeContext'
+import { navigationRef } from './rootNavigation'
+import NavigationStack from './stack'
 
-const Stack = createNativeStackNavigator<RootStackParamList>()
+const PERSISTENCE_KEY = 'NAVIGATION_STATE_V1'
 
 export function AppNavigation() {
+  const [isReady, setIsReady] = useState(Platform.OS === 'web') // Don't persist state on web since it's based on URL
+  const [initialState, setInitialState] = useState()
+  const { colors, theme } = useThemeContext()
+
+  useEffect(() => {
+    const restoreState = async () => {
+      try {
+        const initialUrl = await Linking.getInitialURL()
+
+        if (initialUrl === null) {
+          // Only restore state if there's no deep link
+          const savedStateString = await AsyncStorage.getItem(PERSISTENCE_KEY)
+          const state = savedStateString
+            ? JSON.parse(savedStateString)
+            : undefined
+
+          if (state !== undefined) {
+            setInitialState(state)
+          }
+        }
+      } finally {
+        setIsReady(true)
+      }
+    }
+
+    if (!isReady) {
+      restoreState().catch(console.error)
+    }
+  }, [isReady])
+
+  if (!isReady) {
+    return null
+  }
+
   return (
-    <NavigationContainer>
-      <Stack.Navigator
-        initialRouteName="welcome"
-        screenOptions={{ headerShown: false }}
+    <View style={{ flex: 1, backgroundColor: colors.primary }}>
+      <NavigationContainer
+        initialState={initialState}
+        onStateChange={state =>
+          AsyncStorage.setItem(PERSISTENCE_KEY, JSON.stringify(state))
+        }
+        ref={navigationRef}
+        theme={theme === 'dark' ? defaultDarkTheme : defaultLightTheme}
       >
-        <Stack.Screen name="welcome" component={WelcomeScreen} />
-        <Stack.Screen name="home" component={HomeScreen} />
-        <Stack.Screen name="batteryAlarm" component={BatteryAlarmScreen} />
-      </Stack.Navigator>
-    </NavigationContainer>
+        <NavigationStack />
+      </NavigationContainer>
+    </View>
   )
 }

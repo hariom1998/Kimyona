@@ -4,7 +4,7 @@ export type RootStackParamList ={
     welcome: undefined,
     home:undefined,
     batteryAlarm:BatteryAlarmScreenParams
-
+batteryStats:undefined
 }
 
 export type RootStackScreenProps<T extends keyof RootStackParamList> =
