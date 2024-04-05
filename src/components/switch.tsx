@@ -11,7 +11,7 @@ import { useThemeContext } from '../contexts/themeContext'
 type Props = {}
 
 const Switch = ({}: Props) => {
-  const { theme, setTheme, themeSwitch } = useThemeContext()
+  const { setThemeSwitch, theme, themeSwitch } = useThemeContext()
   const { width } = useWindowDimensions()
   const translateX = useSharedValue(0)
   const SWITCH_CONTAINER_WIDTH = width * 0.8
@@ -85,7 +85,7 @@ const Switch = ({}: Props) => {
       <Pressable
         style={styles.button}
         onPress={() => {
-          setTheme('system')
+          setThemeSwitch('system')
         }}
       >
         <Animated.Text style={[styles.textButton, textColorAnimation]}>
@@ -95,7 +95,7 @@ const Switch = ({}: Props) => {
       <Pressable
         style={styles.button}
         onPress={() => {
-          setTheme('light')
+          setThemeSwitch('light')
         }}
       >
         <Animated.Text style={[styles.textButton, textColorAnimation]}>
@@ -105,7 +105,7 @@ const Switch = ({}: Props) => {
       <Pressable
         style={styles.button}
         onPress={() => {
-          setTheme('dark')
+          setThemeSwitch('dark')
         }}
       >
         <Animated.Text style={[styles.textButton, textColorAnimation]}>

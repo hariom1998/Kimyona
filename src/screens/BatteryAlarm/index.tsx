@@ -1,11 +1,12 @@
 import notifee from '@notifee/react-native'
 import { AVPlaybackStatus, Audio } from 'expo-av'
 import React, { useCallback, useEffect, useState } from 'react'
-import { BackHandler, Button, Text, View } from 'react-native'
+import { BackHandler } from 'react-native'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { BatteryAlarmScreenProps } from '../../navigation/types'
+import BatteryAlarmView from './views/batteryAlarm'
 
 export default function BatteryAlarmScreen({ route }: BatteryAlarmScreenProps) {
-  console.log(route?.params?.autoPlaySound)
   const [sound, setSound] = useState<Audio.Sound | null>()
   const [isPlaying, setIsPlaying] = useState(false)
 
@@ -16,7 +17,6 @@ export default function BatteryAlarmScreen({ route }: BatteryAlarmScreenProps) {
   }, [])
 
   const playSound = useCallback(async () => {
-    console.log('Loading Sound')
     const { sound: audioTrack } = await Audio.Sound.createAsync(
       require('../../../assets/sounds/adiojori.mp3'),
       {
@@ -25,8 +25,6 @@ export default function BatteryAlarmScreen({ route }: BatteryAlarmScreenProps) {
       onPlaybackStatusUpdate
     )
     setSound(audioTrack)
-
-    console.log('Playing Sound')
   }, [onPlaybackStatusUpdate, route?.params?.autoPlaySound])
 
   useEffect(() => {
@@ -35,33 +33,28 @@ export default function BatteryAlarmScreen({ route }: BatteryAlarmScreenProps) {
     }
     return sound
       ? () => {
-          console.log('Unloading Sound')
           sound.unloadAsync().catch(e => console.log(e))
         }
       : undefined
   }, [playSound, sound])
 
-  // useEffect(() => {
-  //   notifee.cancelAllNotifications().catch(e => console.log(e))
-  // }, [])
-
-  const handlePlayPause = async () => {
-    isPlaying ? await sound?.pauseAsync() : await sound?.playAsync()
-    setIsPlaying(!isPlaying)
+  const handlePauseAudio = async () => {
+    await sound?.pauseAsync()
+    setIsPlaying(false)
   }
 
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>BatteryAlarmScreen</Text>
+  const onPressStop = useCallback(async () => {
+    await notifee.cancelAllNotifications().catch(e => console.log(e))
+    BackHandler.exitApp()
+  }, [])
 
-      <Button title={isPlaying ? 'Pause' : 'Play'} onPress={handlePlayPause} />
-      <Button
-        title="Stop"
-        onPress={() => {
-          notifee.cancelAllNotifications().catch(e => console.log(e))
-          BackHandler.exitApp()
-        }}
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <BatteryAlarmView
+        handlePauseAudio={handlePauseAudio}
+        onPressStop={onPressStop}
+        isPlaying={isPlaying}
       />
-    </View>
+    </GestureHandlerRootView>
   )
 }

@@ -21,6 +21,8 @@ interface ColorPalette {
   secondary: string
   white: string
   black: string
+  gray0: string
+  gray1: string
   // Add more colors as needed
 }
 
@@ -29,7 +31,7 @@ export type ThemeSwitch = 'system' | 'light' | 'dark'
 interface ThemeContextValue {
   theme: Theme
   themeSwitch: ThemeSwitch
-  setTheme: (themeSwitch: ThemeSwitch) => void
+  setThemeSwitch: (themeSwitch: ThemeSwitch) => void
   colors: ColorPalette
 }
 
@@ -38,6 +40,8 @@ const defaultLightColors: ColorPalette = {
   secondary: '#CCCCCC',
   white: '#FFFFFF',
   black: '#000000',
+  gray0: '#FCFCFC',
+  gray1: '#F0F0F0',
   // Add default light mode colors
 }
 
@@ -46,6 +50,8 @@ const defaultDarkColors: ColorPalette = {
   black: '#FFFFFF',
   primary: '#000000',
   secondary: '#333333',
+  gray0: '#111111',
+  gray1: '#222222',
   // Add default dark mode colors
 }
 
@@ -77,30 +83,32 @@ export const ThemeProvider = ({ children }: any) => {
   const [themeSwitch, setThemeSwitch] = useState<ThemeSwitch>('system')
 
   useEffect(() => {
-    const fetchThemeFromStorage = async () => {
-      try {
-        const storedTheme = await AsyncStorage.getItem('userTheme')
-        if (storedTheme !== null) {
-          setThemeSwitch(storedTheme as ThemeSwitch)
-          if (storedTheme === 'system' && systemTheme) {
+    if (userTheme === null) {
+      const fetchThemeFromStorage = async () => {
+        try {
+          const storedTheme = await AsyncStorage.getItem('userTheme')
+          if (storedTheme !== null) {
+            setThemeSwitch(storedTheme as ThemeSwitch)
+            if (storedTheme === 'system' && systemTheme) {
+              setUserTheme(systemTheme)
+            }
+          }
+        } catch (error) {
+          console.error('Error retrieving user theme from AsyncStorage:', error)
+          setThemeSwitch('system')
+          if (systemTheme) {
             setUserTheme(systemTheme)
           }
         }
-      } catch (error) {
-        console.error('Error retrieving user theme from AsyncStorage:', error)
-        setThemeSwitch('system')
-        if (systemTheme) {
-          setUserTheme(systemTheme)
-        }
       }
+
+      fetchThemeFromStorage().catch(error => {
+        console.error('Error fetching theme:', error)
+      })
     }
+  }, [systemTheme, userTheme])
 
-    fetchThemeFromStorage().catch(error => {
-      console.error('Error fetching theme:', error)
-    })
-  }, [systemTheme])
-
-  const setTheme = useCallback(
+  const updateThemeSwitch = useCallback(
     async (theme: ThemeSwitch) => {
       try {
         await AsyncStorage.setItem('themeSwitch', theme)
@@ -118,16 +126,18 @@ export const ThemeProvider = ({ children }: any) => {
     },
     [systemTheme]
   )
-  console.log(themeSwitch)
 
-  const colors = userTheme === 'dark' ? defaultDarkColors : defaultLightColors
+  const colors = useMemo(
+    () => (userTheme === 'dark' ? defaultDarkColors : defaultLightColors),
+    [userTheme]
+  )
   const theme = useMemo(
     () => userTheme ?? (systemTheme === 'dark' ? 'dark' : 'light'),
     [systemTheme, userTheme]
   )
   const values = useMemo(
-    () => ({ theme, themeSwitch, setTheme, colors }),
-    [theme, themeSwitch, setTheme, colors]
+    () => ({ theme, themeSwitch, setThemeSwitch: updateThemeSwitch, colors }),
+    [theme, themeSwitch, updateThemeSwitch, colors]
   )
 
   return (

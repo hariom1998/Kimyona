@@ -13,15 +13,12 @@ import {
   withSpring,
   withTiming,
 } from 'react-native-reanimated'
-import { Theme } from '../contexts/themeContext'
-
-type Props = {
-  theme: Theme
-}
+import { useThemeContext } from '../contexts/themeContext'
 
 const RADIUS = 70
 
-const Icon = ({ theme }: Props) => {
+const Icon = () => {
+  const { theme } = useThemeContext()
   const gradientColor1 = useSharedValue('#ff4467')
   const gradientColor2 = useSharedValue('#ff8e0b')
   const mask = useSharedValue(0)

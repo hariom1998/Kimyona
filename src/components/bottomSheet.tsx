@@ -22,6 +22,7 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useThemeContext } from '../contexts/themeContext'
 import Icon from './icon'
+
 import Switch from './switch'
 
 type Props = {}
@@ -32,8 +33,7 @@ export interface BottomSheetMethods {
 }
 
 const BottomSheet = forwardRef<BottomSheetMethods, Props>(({}, ref) => {
-  const { colors, setTheme, theme } = useThemeContext()
-
+  const { theme } = useThemeContext()
   const insets = useSafeAreaInsets()
   const { width } = useWindowDimensions()
 
@@ -49,11 +49,16 @@ const BottomSheet = forwardRef<BottomSheetMethods, Props>(({}, ref) => {
     }
   })
   const textAnimationStyle = useAnimatedStyle(() => {
-    return { color: withTiming(colors.black) }
+    return {
+      color: theme === 'dark' ? withTiming('white') : withTiming('black'),
+    }
   })
 
   const lineAnimationStyle = useAnimatedStyle(() => {
-    return { backgroundColor: withTiming(colors.black) }
+    return {
+      backgroundColor:
+        theme === 'dark' ? withTiming('white') : withTiming('black'),
+    }
   })
 
   const close = useCallback(() => {
@@ -124,7 +129,7 @@ const BottomSheet = forwardRef<BottomSheetMethods, Props>(({}, ref) => {
           ]}
         >
           <Animated.View style={[styles.line, lineAnimationStyle]} />
-          <Icon theme={theme} />
+          <Icon />
           <Animated.Text style={[styles.textTitle, textAnimationStyle]}>
             Choose a style
           </Animated.Text>
@@ -165,12 +170,7 @@ const BackDrop = ({
   })
 
   return (
-    <TouchableWithoutFeedback
-      onPress={() => {
-        console.log('clicked')
-        close()
-      }}
-    >
+    <TouchableWithoutFeedback onPress={close}>
       <Animated.View style={[styles.backdropContainer, backDropAnimation]} />
     </TouchableWithoutFeedback>
   )

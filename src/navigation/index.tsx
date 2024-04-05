@@ -9,6 +9,7 @@ import {
 } from '../contexts/themeContext'
 import { navigationRef } from './rootNavigation'
 import NavigationStack from './stack'
+import { RootStackParamList } from './types'
 
 const PERSISTENCE_KEY = 'NAVIGATION_STATE_V1'
 
@@ -30,7 +31,16 @@ export function AppNavigation() {
             : undefined
 
           if (state !== undefined) {
-            setInitialState(state)
+            // Exclude the screen you want to exclude from state persistence
+            const filteredState = {
+              ...state,
+              // Assuming the screen you want to exclude is 'ScreenToExclude'
+              routes: state.routes.filter(
+                (route: { name: keyof RootStackParamList }) =>
+                  route.name !== 'batteryAlarm'
+              ),
+            }
+            setInitialState(filteredState)
           }
         }
       } finally {

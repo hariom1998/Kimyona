@@ -87,10 +87,9 @@ TaskManager.defineTask(BATTERY_TASK, async () => {
   return BackgroundFetchResult.NewData
 })
 
-export const checkStatusAsync = async (): Promise<[BackgroundFetch.BackgroundFetchStatus|null, boolean]> => {
-    const initialStatus =  await BackgroundFetch.getStatusAsync()
+export const checkStatusAsync = async (): Promise< boolean> => {
     const initialIsRegistered = await  TaskManager.isTaskRegisteredAsync(BATTERY_TASK)
-       return [initialStatus, initialIsRegistered]
+       return initialIsRegistered
 
   }
 
@@ -108,7 +107,6 @@ export const checkStatusAsync = async (): Promise<[BackgroundFetch.BackgroundFet
 
   export const toggleFetchTask = async () => {
     const isRegistered = await TaskManager.isTaskRegisteredAsync(BATTERY_TASK)
-    console.log(isRegistered)
     if (isRegistered) {
       await unregisterBackgroundTaskAsync()
     } else {
@@ -119,9 +117,8 @@ export const checkStatusAsync = async (): Promise<[BackgroundFetch.BackgroundFet
   export const startNotificationHandlers = () => {
     const navigation=navigationRef.current
     notifee.onBackgroundEvent(async ({ type, detail }) => {
-      console.log(type, detail.pressAction)
+
       if (type === EventType.PRESS) {
-        console.log('User pressed notification with id: ', detail.pressAction?.id)
         if (detail.pressAction?.id === 'openBatteryAlarm') {
           navigation?.navigate('batteryAlarm', { autoPlaySound: false })
         }
